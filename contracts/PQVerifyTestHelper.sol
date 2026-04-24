@@ -6,7 +6,7 @@ import "./IPQVerify.sol";
 /// @title PQVerifyTestHelper — Helper contract for end-to-end testing
 /// @notice Wraps the PQ_VERIFY precompile for integration tests
 contract PQVerifyTestHelper {
-    address constant PQ_VERIFY_PRECOMPILE = address(0x0b00);
+    address constant PQ_VERIFY_PRECOMPILE = address(0x0300000000000000000000000000000000000000);
 
     event VerificationResult(bool valid, uint256 gasUsed);
 

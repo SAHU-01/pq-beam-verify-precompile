@@ -1,17 +1,6 @@
 {
-  "_comment": "Beam PQ Testnet genesis config — enables PQ_VERIFY precompile at genesis",
   "config": {
     "chainId": 13337,
-    "homesteadBlock": 0,
-    "eip150Block": 0,
-    "eip155Block": 0,
-    "eip158Block": 0,
-    "byzantiumBlock": 0,
-    "constantinopleBlock": 0,
-    "petersburgBlock": 0,
-    "istanbulBlock": 0,
-    "muirGlacierBlock": 0,
-    "subnetEVMTimestamp": 0,
     "feeConfig": {
       "gasLimit": 15000000,
       "targetBlockRate": 2,
@@ -29,9 +18,7 @@
       ]
     },
     "pqVerifyConfig": {
-      "blockTimestamp": 0,
-      "_comment": "PQ_VERIFY precompile enabled at genesis. Address: 0x0b00",
-      "gasOverrides": null
+      "blockTimestamp": 0
     }
   },
   "alloc": {
@@ -40,7 +27,7 @@
     }
   },
   "nonce": "0x0",
-  "timestamp": "0x0",
+  "timestamp": "0x66309F50",
   "extraData": "0x00",
   "gasLimit": "0xe4e1c0",
   "difficulty": "0x0",

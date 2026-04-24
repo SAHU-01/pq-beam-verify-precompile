@@ -23,7 +23,7 @@ import (
 )
 
 // Precompile address: 0x0000000000000000000000000000000000000b00
-var PrecompileAddress = [20]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x0b, 0x00}
+var PrecompileAddress = [20]byte{0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 // Gas costs for each algorithm.
 // Benchmarked on Apple M1 Pro:

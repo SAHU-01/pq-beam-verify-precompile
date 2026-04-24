@@ -21,7 +21,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 SUBNET_EVM_DIR="$(dirname "$PROJECT_DIR")/subnet-evm"
-SUBNET_NAME="pq-testnet"
+SUBNET_NAME="pqtestnet"
+
+# AvalancheGo disk space threshold (bytes). Default 10GiB may be too high for dev machines.
+# Set to 1GiB for local development.
+AVALANCHEGO_MIN_DISK_SPACE=1073741824
 
 # The pre-funded key from subnet-evm default genesis allocation
 FUNDED_KEY="56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027"
@@ -80,6 +84,11 @@ if [ -d "$SUBNET_EVM_DIR" ]; then
     ok "subnet-evm already cloned at $SUBNET_EVM_DIR"
 else
     info "Cloning subnet-evm..."
+    # IMPORTANT: The archived subnet-evm master depends on avalanchego v1.14.1-antithesis-docker-image-fix.
+    # The matching AvalancheGo binary MUST be built from the same tag (rpcchainvm=44 + HeliconTime).
+    # Using the stock avalanchego v1.14.0 binary will fail with:
+    #   "invalid timestamp: proto: invalid nil Timestamp"
+    # because v1.14.0 doesn't send HeliconTime in the protobuf NetworkUpgrades.
     git clone --depth 1 https://github.com/ava-labs/subnet-evm.git "$SUBNET_EVM_DIR"
     ok "Cloned subnet-evm"
 fi
@@ -279,7 +288,7 @@ import (
 
 const ConfigKey = "pqVerifyConfig"
 
-var ContractAddress = common.HexToAddress("0x0000000000000000000000000000000000000b00")
+var ContractAddress = common.HexToAddress("0x0300000000000000000000000000000000000000")
 
 var Module = modules.Module{
 	ConfigKey:    ConfigKey,
@@ -343,6 +352,32 @@ go build -o "$SUBNET_EVM_DIR/build/subnet-evm" ./plugin/ 2>&1
 ok "Built subnet-evm binary at $SUBNET_EVM_DIR/build/subnet-evm"
 
 # ===========================================================================
+# Step 3b: Build matching AvalancheGo binary
+# ===========================================================================
+echo ""
+info "Step 3b: Building matching AvalancheGo binary..."
+
+# The archived subnet-evm depends on avalanchego v1.14.1-antithesis-docker-image-fix.
+# The Avalanche CLI ships avalanchego v1.14.0 which lacks HeliconTime in the protobuf
+# NetworkUpgrades, causing "proto: invalid nil Timestamp" on chain init.
+# We must build AvalancheGo from the matching tag.
+AVAGO_TAG="v1.14.1-antithesis-docker-image-fix"
+AVAGO_BUILD_DIR="/tmp/avalanchego-build-$$"
+AVAGO_INSTALL_DIR="$HOME/.avalanche-cli/bin/avalanchego/avalanchego-v1.14.0"
+
+if "$AVAGO_INSTALL_DIR/avalanchego" --version 2>/dev/null | grep -q "70148edc6eca"; then
+    ok "AvalancheGo already built from matching tag"
+else
+    info "Cloning and building AvalancheGo $AVAGO_TAG..."
+    git clone --depth 1 --branch "$AVAGO_TAG" https://github.com/ava-labs/avalanchego.git "$AVAGO_BUILD_DIR"
+    cd "$AVAGO_BUILD_DIR" && ./scripts/build.sh
+    mkdir -p "$AVAGO_INSTALL_DIR"
+    cp "$AVAGO_BUILD_DIR/build/avalanchego" "$AVAGO_INSTALL_DIR/avalanchego"
+    rm -rf "$AVAGO_BUILD_DIR"
+    ok "Built and installed matching AvalancheGo"
+fi
+
+# ===========================================================================
 # Step 4: Create the local subnet
 # ===========================================================================
 echo ""
@@ -351,14 +386,15 @@ info "Step 4: Creating local subnet '$SUBNET_NAME'..."
 cd "$PROJECT_DIR"
 
 # Delete old subnet if it exists
-$AVALANCHE_BIN subnet delete "$SUBNET_NAME" --force 2>/dev/null || true
+$AVALANCHE_BIN blockchain delete "$SUBNET_NAME" --force 2>/dev/null || true
 
-$AVALANCHE_BIN subnet create "$SUBNET_NAME" \
+$AVALANCHE_BIN blockchain create "$SUBNET_NAME" \
     --custom \
     --genesis "$PROJECT_DIR/scripts/genesis.json" \
-    --vm "$SUBNET_EVM_DIR/build/subnet-evm"
+    --custom-vm-path "$SUBNET_EVM_DIR/build/subnet-evm" \
+    --force
 
-ok "Created subnet '$SUBNET_NAME'"
+ok "Created blockchain '$SUBNET_NAME'"
 
 # ===========================================================================
 # Step 5: Deploy the subnet locally
@@ -366,7 +402,15 @@ ok "Created subnet '$SUBNET_NAME'"
 echo ""
 info "Step 5: Deploying subnet locally..."
 
-$AVALANCHE_BIN subnet deploy "$SUBNET_NAME" --local 2>&1 | tee /tmp/pq-deploy-output.txt
+# Create a wrapper script that lowers the disk space threshold for local dev
+AVAGO_WRAPPER="/tmp/avalanchego-dev-wrapper.sh"
+cat > "$AVAGO_WRAPPER" << WRAPEOF
+#!/bin/bash
+exec "$AVAGO_INSTALL_DIR/avalanchego" --system-tracker-disk-required-available-space=$AVALANCHEGO_MIN_DISK_SPACE "\$@"
+WRAPEOF
+chmod +x "$AVAGO_WRAPPER"
+
+$AVALANCHE_BIN blockchain deploy "$SUBNET_NAME" --local --ewoq --avalanchego-path "$AVAGO_WRAPPER" 2>&1 | tee /tmp/pq-deploy-output.txt
 
 # Extract the RPC URL from the deployment output
 RPC_URL=$(grep -oE 'http://127\.0\.0\.1:[0-9]+/ext/bc/[a-zA-Z0-9]+/rpc' /tmp/pq-deploy-output.txt | head -1)
@@ -443,6 +487,6 @@ echo "  Contract:        $CONTRACT_ADDR"
 echo "  Precompile:      0x0000000000000000000000000000000000000b00"
 echo "  Funded Key:      0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
 echo ""
-echo "  To stop:         $AVALANCHE_BIN subnet stop $SUBNET_NAME"
+echo "  To stop:         $AVALANCHE_BIN network stop"
 echo "  To verify a sig: cast call $CONTRACT_ADDR 'verifyAndLog(bytes,bytes,bytes,uint8)' 0x<pubkey> 0x<sig> 0x<msg> 0 --rpc-url $RPC_URL"
 echo ""

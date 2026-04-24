@@ -11,7 +11,7 @@ import "./IPQVerify.sol";
 ///      Beam's account abstraction layer via SDK updates.
 contract PQAccount {
     /// @notice Address of the PQ_VERIFY precompile
-    address constant PQ_VERIFY_PRECOMPILE = address(0x0b00);
+    address constant PQ_VERIFY_PRECOMPILE = address(0x0300000000000000000000000000000000000000);
 
     /// @notice The PQ public key that controls this account
     bytes public pqPublicKey;

@@ -2,11 +2,13 @@
 
 Step-by-step instructions for integrating PQ_VERIFY into a Subnet-EVM fork.
 
+> **Important:** The `subnet-evm` repo has been [archived and moved into AvalancheGo](https://github.com/ava-labs/avalanchego/tree/master/graft/subnet-evm). The archived master depends on `avalanchego v1.14.1-antithesis-docker-image-fix`, which requires building AvalancheGo from source to get a matching binary. See [`docs/LOCAL_DEPLOYMENT.md`](../docs/LOCAL_DEPLOYMENT.md) for the full version compatibility story.
+
 ## Prerequisites
 
 - Go 1.23+
 - liboqs 0.15.0+ installed system-wide
-- Avalanche CLI (`avalanche subnet create/deploy`)
+- Avalanche CLI (`avalanche blockchain create/deploy`)
 - Foundry (for contract testing: `cast`, `forge`)
 
 ## Step 1: Fork Subnet-EVM
@@ -77,20 +79,33 @@ export CGO_LDFLAGS="-L/usr/local/lib -loqs -lcrypto"
 ## Step 5: Build the modified binary
 
 ```bash
-CGO_ENABLED=1 go build -o subnet-evm ./cmd/subnet-evm
+CGO_ENABLED=1 go build -o build/subnet-evm ./plugin/
 ```
+
+## Step 5b: Build matching AvalancheGo
+
+The Avalanche CLI's default AvalancheGo v1.14.0 is **incompatible** with the archived subnet-evm (missing `HeliconTime` in protobuf). You must build from the matching tag:
+
+```bash
+git clone --depth 1 --branch v1.14.1-antithesis-docker-image-fix \
+    https://github.com/ava-labs/avalanchego.git /tmp/avago-build
+cd /tmp/avago-build && ./scripts/build.sh
+cp /tmp/avago-build/build/avalanchego ~/.avalanche-cli/bin/avalanchego/avalanchego-v1.14.0/avalanchego
+```
+
+See [`docs/LOCAL_DEPLOYMENT.md`](../docs/LOCAL_DEPLOYMENT.md) for why this is necessary.
 
 ## Step 6: Create and deploy the subnet
 
 ```bash
 # Create subnet with PQ genesis config
-avalanche subnet create pq-testnet \
+avalanche blockchain create pq-testnet \
     --custom \
     --genesis <this-repo>/scripts/genesis.json \
-    --vm subnet-evm
+    --custom-vm-path build/subnet-evm
 
-# Deploy locally
-avalanche subnet deploy pq-testnet --local
+# Deploy locally (use wrapper to lower disk space requirement)
+avalanche blockchain deploy pq-testnet --local --ewoq
 ```
 
 ## Step 7: Verify the precompile

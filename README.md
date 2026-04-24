@@ -247,24 +247,42 @@ See [`docs/TECHNICAL_SPEC.md`](docs/TECHNICAL_SPEC.md) for the full specificatio
 
 ---
 
+## Local Deployment
+
+Deploy PQ_VERIFY on a local Avalanche subnet in one command:
+
+```bash
+./scripts/deploy_local.sh
+```
+
+Or follow the manual steps in **[`docs/LOCAL_DEPLOYMENT.md`](docs/LOCAL_DEPLOYMENT.md)**, which covers:
+
+- Building the custom Subnet-EVM binary with CGo/liboqs
+- Building a matching AvalancheGo binary (required -- the CLI's default binary is incompatible; see the guide for why)
+- Creating and deploying the blockchain
+- Known pitfalls (version mismatch, disk space, address discrepancies)
+- Production integration path for Beam's architecture
+
 ## Subnet-EVM Integration
 
-The `subnet-evm/` directory contains the adapter module for integrating PQ_VERIFY into a Subnet-EVM fork. See [`subnet-evm/INTEGRATION.md`](subnet-evm/INTEGRATION.md) for the complete guide.
+The `subnet-evm/` directory contains the adapter module for integrating PQ_VERIFY into a Subnet-EVM fork. See [`subnet-evm/INTEGRATION.md`](subnet-evm/INTEGRATION.md) for the code-level guide and [`docs/LOCAL_DEPLOYMENT.md`](docs/LOCAL_DEPLOYMENT.md) for the operational guide.
 
 ```mermaid
 graph LR
     A["1. Fork subnet-evm"] --> B["2. Copy pkg/ into fork"]
     B --> C["3. Register module.go"]
     C --> D["4. Build with CGo"]
-    D --> E["5. Deploy local subnet"]
-    E --> F["6. Verify on-chain"]
+    D --> E["5. Build matching AvalancheGo"]
+    E --> F["6. Deploy local subnet"]
+    F --> G["7. Verify on-chain"]
 
     style A fill:#264653,stroke:#2a9d8f,color:#e9f5db
     style B fill:#264653,stroke:#2a9d8f,color:#e9f5db
     style C fill:#264653,stroke:#2a9d8f,color:#e9f5db
     style D fill:#264653,stroke:#2a9d8f,color:#e9f5db
-    style E fill:#264653,stroke:#2a9d8f,color:#e9f5db
+    style E fill:#264653,stroke:#e94560,color:#e9f5db
     style F fill:#264653,stroke:#2a9d8f,color:#e9f5db
+    style G fill:#264653,stroke:#2a9d8f,color:#e9f5db
 ```
 
 ---
