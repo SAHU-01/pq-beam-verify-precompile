@@ -437,7 +437,8 @@ cd "$PROJECT_DIR"
 
 DEPLOY_OUTPUT=$(forge create contracts/PQVerifyTestHelper.sol:PQVerifyTestHelper \
     --rpc-url "$RPC_URL" \
-    --private-key "$FUNDED_KEY" 2>&1)
+    --private-key "$FUNDED_KEY" \
+    --broadcast 2>&1)
 
 echo "$DEPLOY_OUTPUT"
 

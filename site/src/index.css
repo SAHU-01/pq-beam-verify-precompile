@@ -1,0 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --border: #000000;
+  --text: #000000;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --green: #1a7a3a;
+  --red: #c41e1e;
+  --mono: 'Space Mono', ui-monospace, Consolas, monospace;
+  --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --terminal-bg: #1a1a1a;
+  --terminal-text: #e0e0e0;
+  --terminal-green: #4ade80;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+}
+
+#root {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* ── Bento Grid Layouts ──────────────────────────────────────────────── */
+
+.bento-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-bottom: 1px solid #000;
+}
+
+.bento-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border-bottom: 1px solid #000;
+}
+
+.bento-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+
+.bento-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0;
+}
+
+.detail-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.detail-grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.ref-columns {
+  columns: 2;
+  column-gap: 24px;
+}
+
+.flow-svg {
+  max-width: 600px;
+  margin: 0 auto;
+  display: block;
+  width: 100%;
+}
+
+/* ── Cell Styles ─────────────────────────────────────────────────────── */
+
+.cell {
+  border: 1px solid #000;
+  padding: 28px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.cell-no-left { border-left: none; }
+.cell-no-right { border-right: none; }
+.cell-no-top { border-top: none; }
+.cell-no-bottom { border-bottom: none; }
+
+.cell-clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cell-clickable:hover {
+  background: #fafafa !important;
+}
+
+.terminal-cell {
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 20px 24px;
+  line-height: 1.8;
+  border: 1px solid #000;
+  overflow: auto;
+}
+
+/* ── Detail Panels ───────────────────────────────────────────────────── */
+
+.detail-panel {
+  border-top: 2px solid #000;
+  padding: 40px 28px;
+  background: #fafafa;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.8;
+  color: #222;
+  border-bottom: 1px solid #000;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .bento-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bento-3 > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .bento-3 > :nth-child(3) {
+    border-left: 1px solid #000 !important;
+  }
+  .bento-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .detail-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .flow-svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  #root {
+    padding: 20px 12px 40px;
+  }
+
+  .bento-3,
+  .bento-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-3 > *,
+  .bento-2 > * {
+    border-left: 1px solid #000 !important;
+    border-right: 1px solid #000 !important;
+  }
+
+  .bento-3 > :not(:first-child),
+  .bento-2 > :not(:first-child) {
+    border-top: none !important;
+  }
+
+  .bento-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .bento-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cell {
+    padding: 20px;
+  }
+
+  .terminal-cell {
+    padding: 16px;
+    font-size: 11px;
+  }
+
+  .detail-panel {
+    padding: 24px 16px;
+  }
+
+  .detail-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .ref-columns {
+    columns: 1;
+  }
+
+  table {
+    font-size: 11px !important;
+  }
+
+  .flow-svg {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  #root {
+    padding: 16px 8px 32px;
+  }
+
+  .bento-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .cell {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 24px !important;
+  }
+}
