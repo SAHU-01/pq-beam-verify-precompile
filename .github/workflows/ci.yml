@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 env:
-  GO_VERSION: "1.23"
+  GO_VERSION: "1.25"
 
 jobs:
   test:
@@ -81,7 +81,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
-          version: latest
+          version: v2.1.6
         env:
           CGO_ENABLED: "1"
           CGO_CFLAGS: "-I/usr/local/include"
@@ -101,5 +101,5 @@ jobs:
 
       - name: Compile contracts
         run: |
-          solc --abi --bin contracts/IPQVerify.sol -o build/
-          solc --abi --bin contracts/PQAccount.sol -o build/
+          solc --overwrite --abi --bin contracts/IPQVerify.sol -o build/
+          solc --overwrite --abi --bin contracts/PQAccount.sol -o build/

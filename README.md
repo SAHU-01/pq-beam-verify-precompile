@@ -410,8 +410,3 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, testing, and gui
 ## License
 
 [MIT](LICENSE)
-
-## Contact
-
-- [@the_tokenburner](https://x.com/the_tokenburner) (X)
-- [@asahudev](https://github.com/asahudev) (GitHub)

@@ -2,7 +2,7 @@
 
 **Version:** 0.1.0  
 **Status:** Draft  
-**Author:** Ankita Sahu (@asahudev)  
+**Author:** Ankita Sahu (@SAHU-01)  
 **Date:** April 2026
 
 ---
