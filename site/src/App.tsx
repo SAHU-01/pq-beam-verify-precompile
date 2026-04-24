@@ -379,7 +379,7 @@ function OpenSourceDetail() {
 |-- cmd/benchmark/         # Benchmark CLI + Go test benchmarks
 |-- pkg/pqcrypto/          # CGo bindings to liboqs (keygen, sign, verify)
 |-- pkg/pqverify/          # EVM precompile implementation
-|-- contracts/             # Solidity: IPQVerify, PQAccount, TestHelper
+|-- contracts/             # IPQVerify, PQAccount (ERC-4337), PQKeyRotation
 |-- test/                  # End-to-end tests (7 tests)
 |-- scripts/               # deploy_local.sh, demo_onchain.sh, genesis.json
 |-- docs/                  # TECHNICAL_SPEC.md, LOCAL_DEPLOYMENT.md
@@ -462,7 +462,10 @@ function PhaseDetail({ phase }: { phase: number }) {
               { ms: 'CGo bridge to liboqs', detail: 'Direct C bindings. Constant-time operations.' },
               { ms: 'Smart account PoC', detail: 'PQAccount.sol with nonce replay protection.' },
               { ms: 'On-chain verification', detail: 'Valid + tampered sig verified. Block #2, gas 250,146.' },
-              { ms: 'Test suite (34 tests)', detail: '8 unit + 10 precompile + 7 e2e + 4 bench + 5 Solidity.' },
+              { ms: 'ERC-4337 IAccount', detail: 'PQAccount implements validateUserOp(), batch execution, EntryPoint integration.' },
+              { ms: 'Key rotation contract', detail: 'PQKeyRotation.sol — ECDSA→PQ migration, PQ→PQ rotation with 24h timelock, revocation.' },
+              { ms: 'Fuzz tests (ABI decoder)', detail: 'FuzzDecodeInput + FuzzPrecompileRun — found and fixed overflow bug in decodeBytesAt.' },
+              { ms: 'Test suite (36+ tests)', detail: '8 unit + 10 precompile + 7 e2e + 4 bench + 5 Solidity + 2 fuzz targets.' },
               { ms: 'Local subnet deploy', detail: 'Automated script. Chain ID 13337. Genesis-activated.' },
             ].map((r, i) => (
               <tr key={i}>
@@ -481,6 +484,8 @@ function PhaseDetail({ phase }: { phase: number }) {
           { q: 'Why dual algorithms?', a: 'ML-DSA-65 is fast but newer. SLH-DSA-128s uses only hash functions — if lattice math breaks, the fallback is ready.' },
           { q: 'Why 0x0300...0000?', a: 'Follows Subnet-EVM custom precompile range. Avoids conflict with Ethereum native precompiles (0x01-0x09).' },
           { q: 'Why staticcall only?', a: 'Verification is pure — no state changes. staticcall prevents reentrancy and storage corruption.' },
+          { q: 'Why ERC-4337?', a: 'Account abstraction is the standard for smart accounts. Implementing IAccount.validateUserOp() makes PQ accounts compatible with bundlers, paymasters, and the existing AA ecosystem.' },
+          { q: 'Why a key rotation timelock?', a: 'If a PQ key is compromised, the 24h timelock gives the owner time to cancel the rotation via their ECDSA fallback (revokeKey). Defense in depth.' },
         ].map((item, i) => (
           <div key={i} style={{ border: '1px solid #ddd', padding: 16 }}>
             <div style={{ ...mono, fontWeight: 700, fontSize: 11, marginBottom: 6 }}>{item.q}</div>
@@ -829,7 +834,7 @@ function App() {
               { val: '105 us', label: 'ML-DSA verify time' },
               { val: '9,504', label: 'Verifications / sec' },
               { val: '133,600', label: 'Gas per ML-DSA verify' },
-              { val: '34', label: 'Tests passing' },
+              { val: '36+', label: 'Tests + fuzz targets' },
             ].map((item, i) => (
               <div key={i} style={{
                 padding: '16px', border: '1px solid #000',
@@ -976,7 +981,7 @@ function App() {
       <div className="bento-3">
         {[
           { phase: 'Phase 1', title: 'Precompile', status: 'DONE', key: 'phase1',
-            items: ['PQ_VERIFY at 0x0300', 'ML-DSA-65 + SLH-DSA-128s', 'Smart account PoC', 'On-chain verification'], done: true },
+            items: ['PQ_VERIFY precompile', 'ERC-4337 smart account', 'Key rotation contract', 'Fuzz tests + on-chain proof'], done: true },
           { phase: 'Phase 2', title: 'SDK + Native Support', status: 'NEXT', key: 'phase2',
             items: ['TypeScript SDK', 'Key management', 'Type 0x50 in validators', 'Auto PQ key creation'], done: false },
           { phase: 'Phase 3', title: 'Audit + Mainnet', status: 'PLANNED', key: 'phase3',
@@ -1046,10 +1051,10 @@ function App() {
         <div className="bento-stats">
           {[
             { suite: 'pkg/pqcrypto', tests: 8, desc: 'Keygen, sign, verify, tampering' },
-            { suite: 'pkg/pqverify', tests: 10, desc: 'ABI encode/decode, gas, valid/invalid' },
+            { suite: 'pkg/pqverify', tests: 12, desc: 'ABI, gas, valid/invalid + 2 fuzz targets' },
             { suite: 'test/e2e', tests: 7, desc: 'Full flow, dual alg, 1MB message' },
             { suite: 'cmd/benchmark', tests: 4, desc: 'Go benchmarks, both algorithms' },
-            { suite: 'Solidity', tests: 5, desc: 'PQVerifyTestHelper, PQAccount' },
+            { suite: 'Solidity', tests: 6, desc: 'PQAccount (ERC-4337), PQKeyRotation' },
           ].map((t, i) => (
             <div key={i} style={{ border: '1px solid #000', padding: '16px', marginLeft: i > 0 ? -1 : 0 }}>
               <div style={{ ...mono, fontWeight: 700, fontSize: 12 }}>{t.suite}</div>

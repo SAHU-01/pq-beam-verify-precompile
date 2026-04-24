@@ -110,10 +110,19 @@ func decodeInput(input []byte) (pubkey, signature, message []byte, alg uint8, er
 		return nil, nil, nil, 0, ErrInputTooShort
 	}
 
-	// Parse head
-	pubkeyOffset := new(big.Int).SetBytes(input[0:32]).Uint64()
-	sigOffset := new(big.Int).SetBytes(input[32:64]).Uint64()
-	msgOffset := new(big.Int).SetBytes(input[64:96]).Uint64()
+	// Parse head — validate offsets are within bounds
+	pubkeyOffset, err := safeUint64(input[0:32])
+	if err != nil {
+		return nil, nil, nil, 0, ErrInvalidABI
+	}
+	sigOffset, err := safeUint64(input[32:64])
+	if err != nil {
+		return nil, nil, nil, 0, ErrInvalidABI
+	}
+	msgOffset, err := safeUint64(input[64:96])
+	if err != nil {
+		return nil, nil, nil, 0, ErrInvalidABI
+	}
 	alg = input[127] // uint8 is in the last byte of the 32-byte word
 
 	// Validate algorithm
@@ -140,16 +149,33 @@ func decodeInput(input []byte) (pubkey, signature, message []byte, alg uint8, er
 	return pubkey, signature, message, alg, nil
 }
 
+// safeUint64 converts a 32-byte big-endian value to uint64,
+// returning an error if the value exceeds uint64 range.
+func safeUint64(b []byte) (uint64, error) {
+	v := new(big.Int).SetBytes(b)
+	if !v.IsUint64() {
+		return 0, ErrInvalidABI
+	}
+	return v.Uint64(), nil
+}
+
 // decodeBytesAt reads an ABI-encoded bytes field at the given offset.
 func decodeBytesAt(data []byte, offset uint64) ([]byte, error) {
-	if offset+32 > uint64(len(data)) {
+	dataLen := uint64(len(data))
+
+	// Overflow-safe: check offset is within bounds and leaves room for length word
+	if offset > dataLen || dataLen-offset < 32 {
 		return nil, ErrInvalidDataLength
 	}
 
-	length := new(big.Int).SetBytes(data[offset : offset+32]).Uint64()
+	length, err := safeUint64(data[offset : offset+32])
+	if err != nil {
+		return nil, ErrInvalidDataLength
+	}
 	dataStart := offset + 32
 
-	if dataStart+length > uint64(len(data)) {
+	// Overflow-safe: check data region fits
+	if length > dataLen || dataStart > dataLen-length {
 		return nil, ErrInvalidDataLength
 	}
 

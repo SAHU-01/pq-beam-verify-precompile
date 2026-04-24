@@ -81,7 +81,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1.6
+          version: latest
         env:
           CGO_ENABLED: "1"
           CGO_CFLAGS: "-I/usr/local/include"
@@ -103,3 +103,4 @@ jobs:
         run: |
           solc --overwrite --abi --bin contracts/IPQVerify.sol -o build/
           solc --overwrite --abi --bin contracts/PQAccount.sol -o build/
+          solc --overwrite --abi --bin contracts/PQKeyRotation.sol -o build/
