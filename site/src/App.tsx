@@ -448,29 +448,26 @@ RPC_URL=http://127.0.0.1:9650/ext/bc/<subnet-id>/rpc \\
 function PhaseDetail({ phase }: { phase: number }) {
   if (phase === 1) return (
     <div className="detail-panel">
-      <div style={dHead}>Phase 1: Precompile — Completed</div>
-      <p style={body}>The cryptographic foundation is delivered. PQ_VERIFY is implemented, tested, and deployed on a local subnet.</p>
+      <div style={dHead}>Phase 1: Precompile — In Progress</div>
+      <p style={body}>The cryptographic foundation is built. MVP is live with 36+ tests and on-chain proof. Remaining: Beam testnet fork deployment, gas calibration on validator hardware, and integration testing.</p>
       <div style={dSub}>Milestones Delivered</div>
       <div style={{ overflowX: 'auto' }}>
         <table style={dtTable}>
           <thead><tr><th style={dtH}>Milestone</th><th style={dtH}>Status</th><th style={dtH}>Details</th></tr></thead>
           <tbody>
             {[
-              { ms: 'PQ_VERIFY precompile', detail: 'Registered at 0x0300...0000 in Subnet-EVM. Stateless, gas-metered.' },
-              { ms: 'ML-DSA-65 support', detail: 'FIPS 204 lattice-based. Primary algorithm. 105us verify.' },
-              { ms: 'SLH-DSA-128s support', detail: 'FIPS 205 hash-based fallback. 432us verify.' },
-              { ms: 'CGo bridge to liboqs', detail: 'Direct C bindings. Constant-time operations.' },
-              { ms: 'Smart account PoC', detail: 'PQAccount.sol with nonce replay protection.' },
-              { ms: 'On-chain verification', detail: 'Valid + tampered sig verified. Block #2, gas 250,146.' },
-              { ms: 'ERC-4337 IAccount', detail: 'PQAccount implements validateUserOp(), batch execution, EntryPoint integration.' },
-              { ms: 'Key rotation contract', detail: 'PQKeyRotation.sol — ECDSA→PQ migration, PQ→PQ rotation with 24h timelock, revocation.' },
-              { ms: 'Fuzz tests (ABI decoder)', detail: 'FuzzDecodeInput + FuzzPrecompileRun — found and fixed overflow bug in decodeBytesAt.' },
-              { ms: 'Test suite (36+ tests)', detail: '8 unit + 10 precompile + 7 e2e + 4 bench + 5 Solidity + 2 fuzz targets.' },
-              { ms: 'Local subnet deploy', detail: 'Automated script. Chain ID 13337. Genesis-activated.' },
+              { ms: 'PQ_VERIFY precompile', detail: 'Registered at 0x0300...0000. ML-DSA-65 + SLH-DSA-128s via CGo/liboqs.', done: true },
+              { ms: 'ERC-4337 smart account', detail: 'PQAccount with validateUserOp(), batch execution, EntryPoint integration.', done: true },
+              { ms: 'Key rotation contract', detail: 'PQKeyRotation.sol — ECDSA→PQ migration, PQ→PQ rotation with 24h timelock.', done: true },
+              { ms: 'Fuzz-tested ABI decoder', detail: 'FuzzDecodeInput + FuzzPrecompileRun — found and fixed overflow bug.', done: true },
+              { ms: 'On-chain proof (local)', detail: 'Valid + tampered sig verified on local subnet. 36+ tests passing.', done: true },
+              { ms: 'Beam testnet fork deploy', detail: 'Deploy precompile on Beam testnet fork with real validators.', done: false },
+              { ms: 'Gas calibration', detail: 'Benchmark on Beam validator hardware. Calibrate safety margins.', done: false },
+              { ms: 'Technical specification', detail: 'Published spec for precompile, account format, gas schedule.', done: false },
             ].map((r, i) => (
               <tr key={i}>
                 <td style={{ ...dtD, fontWeight: 700 }}>{r.ms}</td>
-                <td style={dtD}><span style={{ color: 'var(--green)', fontWeight: 700 }}>+</span> Done</td>
+                <td style={dtD}><span style={{ color: r.done ? 'var(--green)' : '#666', fontWeight: 700 }}>{r.done ? '+' : '-'}</span> {r.done ? 'Done' : 'Remaining'}</td>
                 <td style={{ ...dtD, fontSize: 11 }}>{r.detail}</td>
               </tr>
             ))}
@@ -493,7 +490,7 @@ function PhaseDetail({ phase }: { phase: number }) {
           </div>
         ))}
       </div>
-      <div style={{ ...mono, fontSize: 12, color: '#555', marginTop: 24 }}>Timeline: May — June 2026</div>
+      <div style={{ ...mono, fontSize: 12, color: '#555', marginTop: 24 }}>Timeline: May — July 2026</div>
     </div>
   )
 
@@ -535,7 +532,7 @@ function PhaseDetail({ phase }: { phase: number }) {
           </div>
         ))}
       </div>
-      <div style={{ ...mono, fontSize: 12, color: '#555', marginTop: 24 }}>Timeline: July — August 2026</div>
+      <div style={{ ...mono, fontSize: 12, color: '#555', marginTop: 24 }}>Timeline: August — October 2026</div>
     </div>
   )
 
@@ -577,7 +574,7 @@ function PhaseDetail({ phase }: { phase: number }) {
           </div>
         ))}
       </div>
-      <div style={{ ...mono, fontSize: 12, color: '#555', marginTop: 24 }}>M3: Sep — Oct 2026 / M4: Nov 2026 — Jan 2027</div>
+      <div style={{ ...mono, fontSize: 12, color: '#555', marginTop: 24 }}>Timeline: November 2026 — January 2027</div>
     </div>
   )
 }
@@ -980,8 +977,8 @@ function App() {
       {/* ══ Roadmap — CLICKABLE PHASES ════════════════════════════ */}
       <div className="bento-3">
         {[
-          { phase: 'Phase 1', title: 'Precompile', status: 'DONE', key: 'phase1',
-            items: ['PQ_VERIFY precompile', 'ERC-4337 smart account', 'Key rotation contract', 'Fuzz tests + on-chain proof'], done: true },
+          { phase: 'Phase 1', title: 'Precompile', status: 'IN PROGRESS', key: 'phase1',
+            items: ['PQ_VERIFY precompile (MVP live)', 'Beam testnet fork deployment', 'Gas calibration on validators', 'ERC-4337 + key rotation contracts'], done: false },
           { phase: 'Phase 2', title: 'SDK + Native Support', status: 'NEXT', key: 'phase2',
             items: ['TypeScript SDK', 'Key management', 'Type 0x50 in validators', 'Auto PQ key creation'], done: false },
           { phase: 'Phase 3', title: 'Audit + Mainnet', status: 'PLANNED', key: 'phase3',
@@ -991,7 +988,7 @@ function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <span style={{ ...mono, fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: '#666' }}>{p.phase}</span>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span style={{ ...mono, fontSize: 9, padding: '2px 8px', border: `1px solid ${p.done ? 'var(--green)' : '#000'}`, color: p.done ? 'var(--green)' : '#000', fontWeight: 700, letterSpacing: '1px' }}>{p.status}</span>
+                <span style={{ ...mono, fontSize: 9, padding: '2px 8px', border: `1px solid ${p.status === 'IN PROGRESS' ? '#d97706' : '#000'}`, color: p.status === 'IN PROGRESS' ? '#d97706' : '#000', fontWeight: 700, letterSpacing: '1px' }}>{p.status}</span>
                 <span style={toggleIcon(expanded === p.key)}>+</span>
               </div>
             </div>

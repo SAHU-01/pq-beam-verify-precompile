@@ -30,7 +30,7 @@ graph TB
             DApp["Any dApp / Game Contract"]
         end
 
-        subgraph Precompile["PQ_VERIFY Precompile @ 0x0b00"]
+        subgraph Precompile["PQ_VERIFY Precompile @ 0x0300"]
             ABI["ABI Decoder<br/><i>abi.encode(pubkey, sig, msg, alg)</i>"]
             MLDSA["ML-DSA-65<br/><i>FIPS 204 | Lattice-based</i><br/>133,600 gas"]
             SLH["SLH-DSA-128s<br/><i>FIPS 205 | Hash-based</i><br/>523,600 gas"]
@@ -72,7 +72,7 @@ sequenceDiagram
     participant User as User / dApp
     participant SDK as TypeScript SDK
     participant EVM as Beam Subnet-EVM
-    participant PC as PQ_VERIFY (0x0b00)
+    participant PC as PQ_VERIFY (0x0300)
     participant OQS as liboqs (CGo)
 
     User->>SDK: sign(message, secretKey, ML-DSA-65)
@@ -132,7 +132,7 @@ graph LR
 ```bash
 brew install liboqs go
 
-git clone https://github.com/pq-beam/verify-precompile.git
+git clone https://github.com/SAHU-01/pq-beam-verify-precompile.git
 cd verify-precompile
 
 # Run all tests
@@ -156,7 +156,7 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local ..
 ninja && sudo ninja install && sudo ldconfig
 
 # Clone and test
-git clone https://github.com/pq-beam/verify-precompile.git
+git clone https://github.com/SAHU-01/pq-beam-verify-precompile.git
 cd verify-precompile
 CGO_ENABLED=1 \
   CGO_CFLAGS="-I/usr/local/include" \
@@ -209,7 +209,7 @@ ML-DSA-65 is the recommended primary algorithm (compact signatures, fast verific
 Call the precompile directly from any smart contract:
 
 ```solidity
-address constant PQ_VERIFY = address(0x0b00);
+address constant PQ_VERIFY = address(0x0300);
 
 (bool success, bytes memory result) = PQ_VERIFY.staticcall(
     abi.encode(pubkey, signature, message, algorithm)
@@ -222,7 +222,7 @@ Or use the typed interface:
 ```solidity
 import "./IPQVerify.sol";
 
-IPQVerify pqVerify = IPQVerify(address(0x0b00));
+IPQVerify pqVerify = IPQVerify(address(0x0300));
 bool valid = pqVerify.pqVerify(pubkey, signature, message, 0); // 0 = ML-DSA-65
 ```
 

@@ -3,8 +3,8 @@ package pqverify
 // Config holds the configuration for the PQ_VERIFY precompile.
 // In Subnet-EVM, precompiles can be enabled/disabled at specific timestamps.
 type Config struct {
-	// Timestamp at which the precompile becomes active (nil = genesis)
-	Timestamp *uint64 `json:"timestamp,omitempty"`
+	// BlockTimestamp at which the precompile becomes active (nil = genesis)
+	BlockTimestamp *uint64 `json:"blockTimestamp,omitempty"`
 
 	// AllowList restricts who can call the precompile (nil = anyone)
 	// For PQ_VERIFY, this should be nil (public verification)
@@ -23,15 +23,15 @@ type GasConfig struct {
 }
 
 // IsEnabled returns true if the precompile should be active at the given block
-// timestamp. If Timestamp is nil, the precompile is active from genesis.
+// timestamp. If BlockTimestamp is nil, the precompile is active from genesis.
 func (c *Config) IsEnabled(blockTimestamp uint64) bool {
 	if c == nil {
 		return false
 	}
-	if c.Timestamp == nil {
+	if c.BlockTimestamp == nil {
 		return true // active from genesis
 	}
-	return blockTimestamp >= *c.Timestamp
+	return blockTimestamp >= *c.BlockTimestamp
 }
 
 // EffectiveGas returns the gas cost for the given algorithm, applying any

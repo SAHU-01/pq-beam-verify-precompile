@@ -30,7 +30,7 @@ import (
 )
 
 // ContractAddress is the precompile address for PQ_VERIFY.
-var ContractAddress = common.HexToAddress("0x0000000000000000000000000000000000000b00")
+var ContractAddress = common.HexToAddress("0x0300000000000000000000000000000000000000")
 
 // Module implements the Subnet-EVM precompile Module interface.
 // When integrated into a Subnet-EVM fork, this struct is registered in
@@ -80,8 +80,12 @@ func NewPQVerifyPrecompile(cfg *pqverify.Config) *PQVerifyPrecompileAdapter {
 // underlying precompile, and returns remaining gas.
 //
 // This is the method Subnet-EVM calls when a transaction or staticcall
-// targets address 0x0b00.
+// targets address 0x0300.
+//
+// accessibleState provides access to the EVM state (not used by PQ_VERIFY
+// since it is stateless, but required by the interface).
 func (p *PQVerifyPrecompileAdapter) Run(
+	accessibleState interface{}, // In Subnet-EVM fork: precompile.AccessibleState
 	caller common.Address,
 	addr common.Address,
 	input []byte,

@@ -168,7 +168,7 @@ Nodes validate PQ transactions by:
 
 ### Phase 1: Precompile Only (This Grant)
 
-- PQ_VERIFY precompile deployed at `0x0b00`
+- PQ_VERIFY precompile deployed at `0x0300`
 - PQ accounts via smart contracts (PQAccount.sol)
 - Game studios and dApps can opt into PQ signing via SDK
 
