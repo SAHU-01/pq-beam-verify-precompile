@@ -1,0 +1,19 @@
+{
+  "name": "@pq-beam/sdk",
+  "version": "0.1.0",
+  "description": "Post-quantum signing SDK for the Beam Network",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "ethers": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "@types/node": "^20.12.0"
+  }
+}

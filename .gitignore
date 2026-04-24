@@ -1,0 +1,35 @@
+# Go
+/vendor/
+*.exe
+*.test
+*.out
+*.prof
+
+# Build
+/build/
+/dist/
+
+# Keys (never commit)
+*.sec
+*.pub
+
+# Benchmarks (generated)
+benchmarks.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (SDK)
+sdk/node_modules/
+sdk/dist/
+sdk/.vitest/
+
+# Temporary
+/tmp/
