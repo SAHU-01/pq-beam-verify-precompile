@@ -112,6 +112,25 @@ This ensures PQ addresses are the same length as standard Ethereum addresses and
 
 PQ accounts are distinguished by their transaction type, not their address format. The EIP-2718 typed envelope (type `0x50`) signals that the transaction carries PQ signature fields.
 
+### Public Key Storage & Recovery
+
+Unlike ECDSA, where `ecrecover` can derive the public key from any signature, **PQ signature schemes do not support public key recovery**. This is a fundamental difference that affects how PQ accounts work:
+
+**ERC-4337 Smart Account path (Phase 1 — current):**
+- The PQ public key is stored in the smart account contract (`PQAccount.sol`) at deployment time.
+- Signature verification calls `PQ_VERIFY.staticcall(pubkey, sig, msg, alg)` with the stored key.
+- Key rotation is managed by `PQKeyRotation.sol`, which maintains an on-chain registry of account → pubkey bindings.
+- Storage cost: ML-DSA-65 pubkey is 1,952 bytes (~61 storage slots at 32 bytes each). This is a one-time cost at account creation.
+
+**Native Type 0x50 path (Phase 2 — future):**
+- The public key is carried in the transaction envelope itself (`pqPublicKey` field in the RLP encoding).
+- The address is derived on-the-fly: `keccak256(pqPublicKey)[12:32]`.
+- Validators verify the signature using the in-envelope pubkey and confirm the derived address matches the `from` field.
+- No on-chain pubkey storage needed — the key travels with every transaction.
+- Tradeoff: larger transactions (1,952 extra bytes for ML-DSA-65), but no state bloat.
+
+**Key recovery is not possible** for either path. If a user loses their PQ secret key, the account is unrecoverable (same as ECDSA today). Social recovery and multi-sig patterns via smart accounts are the recommended mitigation.
+
 ## 5. PQ Transaction Type
 
 ### Type ID: `0x50`

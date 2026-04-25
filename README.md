@@ -10,13 +10,13 @@ Built for the [Beam Foundation Grant](https://www.onbeam.com/) &mdash; Post-Quan
 
 ## Why Post-Quantum?
 
-Quantum computers running Shor's algorithm will break ECDSA, the signature scheme securing every Ethereum-compatible blockchain today. NIST finalized post-quantum signature standards in August 2024. Beam can act now:
+Quantum computers running Shor's algorithm will break ECDSA, the signature scheme securing every Ethereum-compatible blockchain today. On Beam, this means **$4.1B+ in staked assets, validator keys, bridge BLS keys, gaming wallets, and governance** are all protected by cryptography that has a known expiration date. NIST finalized post-quantum standards in August 2024 and mandates federal migration by 2030-2035.
 
+- **Validator keys are the highest-value target** &mdash; compromised validators mean compromised block production and consensus.
 - **Key migration is slow** and must begin before quantum computers are cryptographically relevant (projected 10-15 years).
-- **Gaming assets, user accounts, and validator keys** protected by ECDSA are all at risk.
-- **Beam is positioned to lead** &mdash; as a Subnet-EVM chain, deploying a custom precompile is significantly simpler than on Ethereum mainnet.
+- **Beam is positioned to lead** &mdash; as a Subnet-EVM chain, deploying a custom precompile is significantly simpler than on Ethereum mainnet. No hard fork politics, no years of EIPs.
 
-PQ_VERIFY is the first step: a stateless, gas-metered precompile that lets any smart contract verify post-quantum signatures natively.
+PQ_VERIFY is the first step: a stateless, gas-metered precompile that lets any smart contract &mdash; and eventually validators themselves &mdash; verify post-quantum signatures natively.
 
 ---
 
@@ -263,6 +263,33 @@ Or follow the manual steps in **[`docs/LOCAL_DEPLOYMENT.md`](docs/LOCAL_DEPLOYME
 - Known pitfalls (version mismatch, disk space, address discrepancies)
 - Production integration path for Beam's architecture
 
+### On-Chain Demo Results (Local Subnet)
+
+The following results are from a local Avalanche subnet running the modified Subnet-EVM with PQ_VERIFY registered at `0x0300000000000000000000000000000000000000`:
+
+| Item | Value |
+|------|-------|
+| Chain ID | 13337 |
+| VM | Subnet-EVM v0.8.0 + PQ_VERIFY |
+| Precompile address | `0x0300000000000000000000000000000000000000` |
+| PQVerifyTestHelper | `0x52C84043CD9c865236f11d9Fc9F56aa003c1f922` |
+| PQAccount | `0x5DB9A7629912EBF95876228C24A848de0bfB43A9` |
+| Valid signature TX | `0x5bc2aff8383473be1e9ba070adb2dd8935c961c804f9e74ce0d763a51752febc` |
+| Tampered signature TX | `0x9cb8d4f678e360364bdc455f33806933c82ed7d1894bb57ed56b4241a7110907` |
+| Block | #2 |
+| Gas used (valid tx) | 250,146 |
+| Precompile gas | 140,072 |
+
+**Valid signature**: ML-DSA-65 signature over "Hello Beam! Post-quantum signatures are live on-chain." with a 1,952-byte public key and 3,309-byte signature. Precompile returned `true`.
+
+**Tampered signature**: Same pubkey and message, 1 byte flipped in signature. Precompile returned `false`.
+
+> **Note**: These are local subnet results. Public Beam testnet deployment is the next Phase 1 deliverable.
+
+To reproduce: `./scripts/deploy_local.sh` then `./scripts/demo_onchain.sh`
+
+---
+
 ## Subnet-EVM Integration
 
 The `subnet-evm/` directory contains the adapter module for integrating PQ_VERIFY into a Subnet-EVM fork. See [`subnet-evm/INTEGRATION.md`](subnet-evm/INTEGRATION.md) for the code-level guide and [`docs/LOCAL_DEPLOYMENT.md`](docs/LOCAL_DEPLOYMENT.md) for the operational guide.
@@ -306,7 +333,8 @@ pq-beam-verify-precompile/
 |
 |-- contracts/
 |   |-- IPQVerify.sol          Solidity interface for the precompile
-|   |-- PQAccount.sol          PQ smart account proof-of-concept
+|   |-- PQAccount.sol          ERC-4337 smart account with PQ verification
+|   |-- PQKeyRotation.sol      ECDSA→PQ migration + PQ key rotation with timelock
 |   +-- PQVerifyTestHelper.sol Test helper with batch verification
 |
 |-- cmd/
@@ -341,11 +369,12 @@ CGO_ENABLED=1 go test ./cmd/benchmark/ -bench=. -benchmem
 | Layer | Tests | Coverage |
 |-------|-------|----------|
 | `pkg/pqcrypto` | 8 | Keygen, sign, verify, tampering, empty messages, cross-algorithm |
-| `pkg/pqverify` | 10 | ABI encode/decode, gas accounting, valid/invalid sigs, malformed input |
+| `pkg/pqverify` | 10 + 2 fuzz | ABI encode/decode, gas, valid/invalid sigs, malformed input, `FuzzDecodeInput`, `FuzzPrecompileRun` |
 | `test/e2e` | 7 | Full flow, dual algorithm, 1MB message, 50 sequential, address determinism |
 | `cmd/benchmark` | 4 | Go benchmark suite for verify + sign, both algorithms |
-| Solidity | CI | Compilation check for all contracts |
-| SDK | Vitest | Constants, address derivation, PQ transaction detection |
+| Solidity | CI | Compilation check for IPQVerify, PQAccount (ERC-4337), PQKeyRotation |
+
+> **Fuzz testing**: `FuzzDecodeInput` found and fixed an overflow bug in `decodeBytesAt()` where `big.Int.Uint64()` silently overflowed on crafted inputs, causing a validator-crashing panic. Fixed with `safeUint64()` and overflow-safe bounds checks. ~4M fuzz executions clean.
 
 All test data is **ephemeral** &mdash; fresh keypairs generated per test run. No hardcoded keys or canned results.
 

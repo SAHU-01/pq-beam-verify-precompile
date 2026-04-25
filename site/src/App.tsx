@@ -608,13 +608,14 @@ function App() {
         <div className="cell">
           <div style={heading}>Simple and Secure</div>
           <p style={body}>
-            Quantum computers will break today's blockchain
-            signatures. PQ_VERIFY adds quantum-resistant
-            verification as a native EVM operation.
+            Beam's $4.1B+ in staked assets, validator keys, and
+            gaming economy are protected by ECDSA — cryptography
+            that quantum computers will break. PQ_VERIFY adds
+            quantum-resistant verification at the VM level.
           </p>
           <p style={{ ...body, marginTop: 12 }}>
-            Any smart contract can call it. No libraries to import,
-            no off-chain services. One <code style={mono}>staticcall</code>.
+            Any smart contract can call it — and eventually,
+            validators themselves. One <code style={mono}>staticcall</code>.
           </p>
           <ShieldIcon />
         </div>
