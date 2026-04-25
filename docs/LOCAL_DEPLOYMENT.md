@@ -318,7 +318,7 @@ When integrating PQ_VERIFY into Beam's production subnet, the approach changes s
 - [ ] liboqs statically linked in the validator binary
 - [ ] Gas costs calibrated on Beam validator hardware
 - [ ] Precompile address finalized and documented
-- [ ] Security audit of CGo boundary (M3 milestone)
+- [ ] Security audit of CGo boundary (Phase 3)
 - [ ] Fuzzing of ABI decoder with malformed inputs
 - [ ] Testnet deployment with monitoring for 2+ weeks
 - [ ] Governance proposal for mainnet activation timestamp

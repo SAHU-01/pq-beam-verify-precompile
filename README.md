@@ -313,7 +313,7 @@ pq-beam-verify-precompile/
 |   |-- benchmark/             Benchmark CLI + Go benchmarks
 |   +-- keygen/                PQ keypair generation CLI
 |
-|-- sdk/                       TypeScript SDK (Milestone 2)
+|-- sdk/                       TypeScript SDK (Phase 2)
 |-- test/                      End-to-end integration tests
 |-- scripts/                   Genesis config + deploy scripts
 |-- docs/                      Technical specification
@@ -359,27 +359,22 @@ gantt
     dateFormat YYYY-MM
     axisFormat %b %Y
 
-    section M1: Precompile
-    Precompile implementation     :done,  m1a, 2026-05, 2026-06
-    Dual algorithm support        :done,  m1b, 2026-05, 2026-06
-    Transaction type 0x50         :done,  m1c, 2026-05, 2026-06
-    Smart account PoC             :done,  m1d, 2026-05, 2026-06
-    Subnet-EVM adapter            :done,  m1e, 2026-05, 2026-06
+    section Phase 1: Precompile
+    PQ_VERIFY precompile (MVP)    :done,   p1a, 2026-05, 2026-06
+    ERC-4337 + key rotation       :done,   p1b, 2026-05, 2026-06
+    Fuzz tests + on-chain proof   :done,   p1c, 2026-05, 2026-06
+    Beam testnet fork deploy      :active, p1d, 2026-06, 2026-07
+    Gas calibration on validators :        p1e, 2026-06, 2026-07
 
-    section M2: SDK
-    TypeScript SDK                :       m2a, 2026-07, 2026-08
-    Key management                :       m2b, 2026-07, 2026-08
-    Transaction signing           :       m2c, 2026-07, 2026-08
+    section Phase 2: SDK + Native Support
+    TypeScript SDK + WASM         :        p2a, 2026-08, 2026-10
+    Unity / Unreal SDK PRs        :        p2b, 2026-08, 2026-10
+    Type 0x50 in validators       :        p2c, 2026-09, 2026-10
 
-    section M3: Audit
-    Security audit                :       m3a, 2026-09, 2026-10
-    Validator benchmarks          :       m3b, 2026-09, 2026-10
-    Side-channel analysis         :       m3c, 2026-09, 2026-10
-
-    section M4: Mainnet
-    Mainnet deployment            :       m4a, 2026-11, 2027-01
-    Migration toolkit             :       m4b, 2026-11, 2027-01
-    CLI tools + docs              :       m4c, 2026-11, 2027-01
+    section Phase 3: Audit + Mainnet
+    Security audit (CGo, ABI)     :        p3a, 2026-11, 2026-12
+    Testnet validation            :        p3b, 2026-11, 2026-12
+    Mainnet deploy + migration    :        p3c, 2026-12, 2027-01
 ```
 
 ---
@@ -390,10 +385,10 @@ gantt
 - **Gas-metered**: Costs prevent DoS via expensive verification.
 - **NIST-standardized**: Both algorithms are finalized FIPS standards (204/205), not experimental.
 - **Dual algorithm strategy**: Hash-based fallback (SLH-DSA-128s) if lattice assumptions are ever broken.
-- **Constant-time**: liboqs is designed for constant-time operation. CGo boundary timing will be examined in the M3 security audit.
+- **Constant-time**: liboqs is designed for constant-time operation. CGo boundary timing will be examined in the Phase 3 security audit.
 - **No simulations**: Every cryptographic operation calls liboqs via CGo. All test data is generated fresh per run.
 
-**Planned M3 audit scope:**
+**Planned Phase 3 audit scope:**
 - CGo boundary side-channel analysis
 - ABI decoder fuzzing with untrusted input
 - Gas cost validation on validator hardware

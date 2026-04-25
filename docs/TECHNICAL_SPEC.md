@@ -210,7 +210,7 @@ ML-DSA-65 public keys (1,952 bytes) are significantly larger than ECDSA (33/65 b
 
 ### Side-Channel Resistance
 
-The liboqs implementation used in the precompile is designed for constant-time operation. However, CGo boundary may introduce timing variations. The security audit (M3) will specifically examine this.
+The liboqs implementation used in the precompile is designed for constant-time operation. However, CGo boundary may introduce timing variations. The security audit (Phase 3) will specifically examine this.
 
 ### Signature Malleability
 
@@ -228,7 +228,7 @@ The use of CGo to call liboqs is an operational concern for validator builds. Ho
 - Ethereum's `bn256` pairing precompile used a C implementation (cloudflare/bn256) for years before pure Go alternatives matured.
 - The `bls12-381` precompile (EIP-2537) references both C (blst) and Go implementations.
 
-The long-term goal is a pure Go implementation of FIPS 204/205 to eliminate CGo entirely. In the interim, static linking of liboqs reduces operator burden and removes the runtime dependency on shared libraries. The security audit (M3) will specifically examine the CGo boundary for memory safety, side-channel leakage, and cross-platform determinism.
+The long-term goal is a pure Go implementation of FIPS 204/205 to eliminate CGo entirely. In the interim, static linking of liboqs reduces operator burden and removes the runtime dependency on shared libraries. The security audit (Phase 3) will specifically examine the CGo boundary for memory safety, side-channel leakage, and cross-platform determinism.
 
 ### Precompile Safety
 
