@@ -1089,7 +1089,7 @@ RPC_URL=<rpc-url> ./scripts/demo_onchain.sh`}
       </div>
       <div className="bento-3" style={{ borderTop: 'none' }}>
         {[
-          { title: 'Dual Algorithm', desc: 'Hash-based fallback if lattice assumptions are ever weakened.' },
+          { title: 'Non-Malleable', desc: 'Both ML-DSA-65 and SLH-DSA-128s produce canonical signatures. No EIP-2 equivalent needed — malleability is impossible by design.' },
           { title: 'Constant-Time', desc: 'liboqs designed for constant-time. CGo boundary under Phase 3 audit.' },
           { title: 'Ephemeral Tests', desc: 'All test data generated fresh per run. No hardcoded keys.' },
         ].map((item, i) => (
@@ -1120,6 +1120,8 @@ RPC_URL=<rpc-url> ./scripts/demo_onchain.sh`}
                 Investigate pure Go implementations of FIPS 204/205 to eliminate CGo entirely.
                 Evaluate static linking of liboqs to reduce operator burden. Benchmark
                 pure-Go vs CGo performance to determine if the tradeoff is acceptable.
+                Note: Ethereum's own bn256 precompile used C dependencies for years before
+                pure Go alternatives matured — CGo in precompiles has precedent.
               </div>
             </div>
           </div>
@@ -1152,6 +1154,7 @@ RPC_URL=<rpc-url> ./scripts/demo_onchain.sh`}
               <div style={{ color: '#555', lineHeight: 1.6 }}>
                 Publish a benchmark matrix across low-end AWS EC2 instances and bare-metal
                 servers. Validate that 133,600 gas doesn't open a DoS vector on slower nodes.
+                Account for memory expansion costs of large signatures (SLH-DSA-128s at ~8KB).
                 Gas costs are configurable per-chain via genesis gasOverrides — but the
                 defaults must be safe for the weakest validator in the set.
               </div>

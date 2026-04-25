@@ -45,6 +45,7 @@ You will receive an acknowledgment within 48 hours. We aim to provide a fix or m
 | Constant-time | Delegated to liboqs (designed for constant-time) |
 | Gas-metered | Yes — proportional to computation with 10x safety margin |
 | Reentrancy safe | Yes — no external calls, no state changes |
+| Non-malleable | Yes — ML-DSA-65 and SLH-DSA-128s produce canonical, deterministic signatures (no EIP-2 equivalent needed) |
 
 ### Known Limitations
 
@@ -53,6 +54,10 @@ You will receive an acknowledgment within 48 hours. We aim to provide a fix or m
 2. **Gas cost approximation**: Gas costs are benchmarked on Apple M1 Pro with a 10x safety margin. Production validators on different hardware may see different performance. Gas costs are configurable per-chain via genesis `gasOverrides`.
 
 3. **liboqs version sensitivity**: Algorithm names changed between liboqs versions (e.g., `SLH-DSA-SHAKE-128s` to `SLH_DSA_PURE_SHA2_128S`). The precompile is tested against liboqs 0.15.0. Other versions may fail silently.
+
+4. **Memory expansion costs**: SLH-DSA-128s signatures are ~8KB. The gas formula accounts for CPU compute time with a 10x safety margin but does not separately meter memory I/O for large signature buffers. This must be validated on production hardware.
+
+5. **CGo in consensus path**: Injecting C code into a Go-based consensus client has operational risks (cross-compilation complexity, validator build fragility). This has precedent (Ethereum's bn256 precompile used C), but the long-term goal is a pure Go implementation of FIPS 204/205.
 
 ## Audit Status
 

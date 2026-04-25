@@ -23,7 +23,7 @@ ML-DSA-65 is the primary algorithm (compact signatures, fast verification). SLH-
 ### Address
 
 ```
-0x0000000000000000000000000000000000000b00
+0x0300000000000000000000000000000000000000
 ```
 
 ### ABI
@@ -92,7 +92,9 @@ Gas costs are derived from CPU time benchmarks on Apple M1 Pro reference hardwar
 
 The 10x safety margin accounts for validator hardware variance (ARM vs x86, different CPU generations), different liboqs builds, and provides conservative DoS protection. SLH-DSA-128s correctly costs more gas than ML-DSA-65 because it is the slower algorithm (~4x slower at verification).
 
-Final gas values will be calibrated on Beam validator hardware before mainnet activation.
+The current gas formula accounts for CPU compute time only. Memory expansion costs for large signatures (SLH-DSA-128s at 7,856 bytes) are not separately metered — the EVM's native `memory_cost = (memory_size_word ** 2) / 512 + (3 * memory_size_word)` applies to calldata loading, but the precompile's internal buffer allocation is covered by the safety margin. This assumption must be validated on production hardware.
+
+Final gas values will be calibrated on Beam validator hardware before mainnet activation. A benchmark matrix across AWS EC2 instances (t3.large, c5.xlarge) and bare-metal Linux servers is required to ensure gas costs are safe for the weakest validator in the set.
 
 ## 4. PQ Account Format
 
@@ -209,6 +211,24 @@ ML-DSA-65 public keys (1,952 bytes) are significantly larger than ECDSA (33/65 b
 ### Side-Channel Resistance
 
 The liboqs implementation used in the precompile is designed for constant-time operation. However, CGo boundary may introduce timing variations. The security audit (M3) will specifically examine this.
+
+### Signature Malleability
+
+Unlike ECDSA (which required EIP-2 to enforce low-S values to prevent signature malleability), both ML-DSA-65 and SLH-DSA-128s are **non-malleable by design**:
+
+- **ML-DSA-65 (FIPS 204):** The signing algorithm produces a canonical encoding. There is no degree of freedom in the signature representation — a given (message, secret key) pair produces a unique, deterministic signature. Padding bits are fixed by the spec.
+- **SLH-DSA-128s (FIPS 205):** Uses deterministic signing with no flexibility in encoding. The hash-based construction produces exactly one valid signature per (message, key) pair.
+
+This means transaction hash uniqueness is preserved without requiring additional strictness checks analogous to EIP-2. The precompile does not need to enforce canonical form — the algorithms guarantee it.
+
+### CGo Dependency and Precedent
+
+The use of CGo to call liboqs is an operational concern for validator builds. However, this approach has precedent in the EVM ecosystem:
+
+- Ethereum's `bn256` pairing precompile used a C implementation (cloudflare/bn256) for years before pure Go alternatives matured.
+- The `bls12-381` precompile (EIP-2537) references both C (blst) and Go implementations.
+
+The long-term goal is a pure Go implementation of FIPS 204/205 to eliminate CGo entirely. In the interim, static linking of liboqs reduces operator burden and removes the runtime dependency on shared libraries. The security audit (M3) will specifically examine the CGo boundary for memory safety, side-channel leakage, and cross-platform determinism.
 
 ### Precompile Safety
 
