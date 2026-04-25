@@ -1099,6 +1099,67 @@ RPC_URL=<rpc-url> ./scripts/demo_onchain.sh`}
         ))}
       </div>
 
+      {/* ══ Open Research & Known Limitations ═══════════════════ */}
+      <div style={{ borderBottom: '1px solid #000', padding: '28px' }}>
+        <div style={heading}>Open Research & Known Limitations</div>
+        <p style={{ ...body, marginBottom: 20 }}>
+          Shipping PQ verification to mainnet requires solving hard engineering and operational
+          problems. These are the areas that need further research and validation before production deployment.
+        </p>
+        <div className="bento-3">
+          <div className="cell">
+            <div style={{ ...mono, fontWeight: 700, fontSize: 11, marginBottom: 8, color: '#c41e1e' }}>CGo / liboqs Deployment Friction</div>
+            <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>
+              Injecting CGo dependencies into a Subnet-EVM fork complicates cross-compilation
+              and makes validator setups more fragile. Node operators must install liboqs
+              and build with CGO_ENABLED=1 — a non-trivial change to existing build pipelines.
+            </p>
+            <div style={{ ...mono, fontSize: 11, marginTop: 'auto' }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>Research needed:</div>
+              <div style={{ color: '#555', lineHeight: 1.6 }}>
+                Investigate pure Go implementations of FIPS 204/205 to eliminate CGo entirely.
+                Evaluate static linking of liboqs to reduce operator burden. Benchmark
+                pure-Go vs CGo performance to determine if the tradeoff is acceptable.
+              </div>
+            </div>
+          </div>
+          <div className="cell" style={{ borderLeft: 'none', borderRight: 'none' }}>
+            <div style={{ ...mono, fontWeight: 700, fontSize: 11, marginBottom: 8, color: '#c41e1e' }}>EIP-2718 Type 0x50 vs ERC-4337 Path</div>
+            <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>
+              Introducing a new transaction type (0x50) requires deep consensus-level and
+              mempool changes across all validators. This is the endgame but has high
+              coordination cost.
+            </p>
+            <div style={{ ...mono, fontSize: 11, marginTop: 'auto' }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>Mitigation:</div>
+              <div style={{ color: '#555', lineHeight: 1.6 }}>
+                Lean into PQAccount.sol as an ERC-4337 Smart Account first. Route through
+                existing bundler infrastructure so developers can test PQ-secured assets
+                immediately — without requiring a full network upgrade for new tx envelopes.
+                Native Type 0x50 follows once the account abstraction path is validated.
+              </div>
+            </div>
+          </div>
+          <div className="cell">
+            <div style={{ ...mono, fontWeight: 700, fontSize: 11, marginBottom: 8, color: '#c41e1e' }}>Gas Calibration on Real Hardware</div>
+            <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>
+              Current benchmarks are on Apple M1 Pro. The 10x safety margin buffers for
+              hardware variance, but doesn't reflect the reality of decentralized validator
+              hardware (x86 cloud instances, bare-metal, ARM servers).
+            </p>
+            <div style={{ ...mono, fontSize: 11, marginTop: 'auto' }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>Required before mainnet:</div>
+              <div style={{ color: '#555', lineHeight: 1.6 }}>
+                Publish a benchmark matrix across low-end AWS EC2 instances and bare-metal
+                servers. Validate that 133,600 gas doesn't open a DoS vector on slower nodes.
+                Gas costs are configurable per-chain via genesis gasOverrides — but the
+                defaults must be safe for the weakest validator in the set.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ══ References ═══════════════════════════════════════════ */}
       <div style={{ padding: '28px', borderBottom: '1px solid #000' }}>
         <div style={heading}>References</div>
